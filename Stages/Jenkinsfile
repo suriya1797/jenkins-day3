@@ -1,0 +1,53 @@
+pipeline{
+    agent any
+    parameters {
+        string(name: 'VALUE_BUILD', defaultValue: '123', description: 'BUild Number')
+    }
+    environment {
+        nodeimagename = "jenkins/multi-node-repo:"
+        registryCredential = 'suriya_docker'
+        dockerImage = ''
+    } 
+    stages{
+        stage('dev stage'){
+            agent {
+                node { 
+                    label  'dev-jenkins' 
+                }
+            }
+            steps{
+                sh 'docker rmi -f $(docker images -aq)'
+                script {
+                dockerImage = docker.image("${nodeimagename}${VALUE_BUILD}")
+                docker.withRegistry('', registryCredential) {
+                    dockerImage.pull()
+                }
+                sh "imagename=${nodeimagename}${VALUE_BUILD}  docker-compose up -d"
+            }
+            }
+
+
+        }
+        stage("QA stage"){
+            agent {
+                node { 
+                    label  'QA-jenkins' 
+                }
+            }
+            input {
+                message "Should we continue?"
+                ok "Yes"
+            }
+            steps{
+                sh 'docker rmi -f $(docker images -aq)'
+                script {
+                dockerImage = docker.image("${nodeimagename}${VALUE_BUILD}")
+                docker.withRegistry('', registryCredential) {
+                    dockerImage.pull()
+                }
+                sh "imagename=${nodeimagename}${VALUE_BUILD}  docker-compose up -d"
+            }
+        }
+    }
+}
+}
