@@ -28,12 +28,12 @@ pipeline {
         }
       }
     }
-    stage('cleanup'){
-      steps{
-         //sh 'sudo docker rmi -f $(docker images -aq)'
-         echo "Clean Up Running."
-      }
-    }
+    // stage('cleanup'){
+    //   steps{
+    //      //sh 'sudo docker rmi -f $(docker images -aq)'
+    //      echo "Clean Up Running."
+    //   }
+    // }
     stage('DEV-QA-stage'){
       steps{
         build job: 'sample job1', parameters: [string(name: 'VALUE_BUILD', value:"$BUILD_NUMBER")], propagate: false
